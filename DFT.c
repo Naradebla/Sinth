@@ -46,4 +46,7 @@ int main(int argc, char **argv)
 {
 	double data[maxSample];
 	int len = loadCSV("test.csv",&data[0]);
+	for(int i = 0; i < len;i++){
+		printf("%d",data[i]);
+	}
 }
