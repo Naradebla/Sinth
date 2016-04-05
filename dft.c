@@ -4,8 +4,9 @@
 #include <string.h>
 
 #define ZeroMemory(a,b) memset(a,0,b)
+#define FillArray(a,b,c) memset(a,c,b)
 
-#define maxSample 250
+#define maxSample 10000
 #define pi 3.1415
 int loadCSV(char* path,double* outA,double* outB){
 	FILE *fp;
@@ -32,7 +33,7 @@ int loadCSV(char* path,double* outA,double* outB){
 			i = 0;
 			c = 0;
 			outputBuffer[p] = atof(dataBuffer);
-			outputBuffer[p] = atof(dataBufferB);
+			outputBufferB[p] = atof(dataBufferB);
 			ZeroMemory(dataBuffer,10);
 			ZeroMemory(dataBufferB,10);
 			p++;	
@@ -67,6 +68,7 @@ int DFT(double* input,double* time, double* output, int samples, double* freqs,i
 	for(int i = 0; i < freqLen;i++){
 		for(int c = 0; c < samples; c++){
 			reTemp = reTemp + (*inputPointer * cos(2*pi*(*freqPointer)*(*timePointer)));
+			//printf("%f",*timePointer);
 			imTemp = reTemp + (*inputPointer * sin(2*pi*(*freqPointer)*(*timePointer)));
 			inputPointer++;
 			timePointer++;
@@ -74,6 +76,7 @@ int DFT(double* input,double* time, double* output, int samples, double* freqs,i
 		returnVal[i] = sqrt((reTemp*reTemp)+(imTemp*imTemp));
 		freqPointer++;
 		inputPointer = input;
+		timePointer = time;
 		reTemp = 0;
 		imTemp = 0;
 	}
@@ -83,6 +86,20 @@ int DFT(double* input,double* time, double* output, int samples, double* freqs,i
 	}
 	return freqLen;
 }
+void newDFT(const double inReal[],const double inImag[],double outReal[],double outImag[],int n){
+	for(int k = 0; k < n; k++){
+		double sumReal = 0;
+		double sumImag = 0;
+		for(int t = 0; t < n; t++){
+			double angle = 2 * M_PI * t *k/n;
+			sumReal += inReal[t] * cos(angle) + inImag[t] * sin(angle);
+			sumImag += -inReal[t] * sin(angle) + inImag[t] * cos(angle);
+		}
+		outReal[k] = sumReal;
+		outImag[k] = sumImag;
+	}
+}
+
 void generateFreqList(double* target,int len, double baseFreq,double endFreq){
 	double step = (endFreq-baseFreq)/len;
 	for(int i = 0; i < len;i++){
@@ -108,11 +125,20 @@ int main(int argc, char **argv)
 	for(int i = 0; i < len;i++){
 		printf("Data %i: %f,%f\n",i,data[i],time[i]);
 	}
-	double freqs[50];
+	double immag[len];
+	double dftRel[len];
+	double dftImmag[len];
+	double out[len];
+	FillArray(&immag[0],sizeof(double)*len,0);
+	newDFT(data,immag,dftRel,dftImmag,len);
+	for(int i = 0; i < len; i++){
+		out[i] = sqrt((dftRel[i]*dftRel[i])+(dftImmag[i]*dftImmag[i]));
+	}
+	/*double freqs[50];
 	int freqLen = 50;
-	generateFreqList(&freqs[0],freqLen,10,10000);
+	generateFreqList(&freqs[0],freqLen,10,1000);
 	double DFTVals[50];
-	DFT(&data[0],&DFTVals[0],&time[0],len,&freqs[0],freqLen);
-	writeCSV(&DFTVals[0],&freqs[0],freqLen,"DFT.csv");
+	DFT(&data[0],&time[0],&DFTVals[0],len,&freqs[0],freqLen);*/
+	writeCSV(&out[0],&time[0],len,"DFT.csv");
 	
 }

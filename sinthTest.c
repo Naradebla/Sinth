@@ -3,15 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 //400 Hz
-#define FREQUNECY 400 
+//#define FREQUNECY 400 
 //20 Ksample/sec
-#define SAMPLERATE 20000 
+#define SAMPLERATE 20000
 //2 V
 #define AMPLITUDE 2 
 static inline int periodSample(double sRate,double freq){
 	double samples = (1/freq)*sRate;
-	//printf("Samples: %f \n",samples);
 	return samples;
+	//return 50;
 }
 double* sineWave(int sRate, int freq,int ampl){
 	//sRate-> sample rate (sample/sec)
@@ -96,8 +96,11 @@ int main(int argc, char **argv)
 		printf("Error");
 		return -1;
 	}
+	int FREQUNECY;
 	printf("Ciao! \n");
 	printf("Sample rate: %i sample/s\n",SAMPLERATE);
+	printf("Inserisci frequezta:");
+	scanf("%d",&FREQUNECY);
 	printf("Frequency: %i Hz\n",FREQUNECY);
 	printf("Amplitude: %i V\n",AMPLITUDE);
 	int samples = periodSample(SAMPLERATE,FREQUNECY);
